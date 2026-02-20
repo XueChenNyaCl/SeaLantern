@@ -7,7 +7,7 @@ import SLSelect from "../components/common/SLSelect.vue";
 import SLButton from "../components/common/SLButton.vue";
 import SLInput from "../components/common/SLInput.vue";
 import { configApi } from "../api/config";
-import { pluginApi, type PluginInfo, type PluginConfigFile } from "../api/mcs_plugins";
+import { m_pluginApi, type m_PluginInfo, type m_PluginConfigFile } from "../api/mcs_plugins";
 import type { ConfigEntry as ConfigEntryType } from "../api/config";
 import { useServerStore } from "../stores/serverStore";
 import { i18n } from "../language";
@@ -44,9 +44,9 @@ const serverPath = computed(() => {
   return server?.path || "";
 });
 
-const plugins = ref<PluginInfo[]>([]);
+const plugins = ref<m_PluginInfo[]>([]);
 const pluginsLoading = ref(false);
-const selectedPlugin = ref<PluginInfo | null>(null);
+const selectedPlugin = ref<m_PluginInfo | null>(null);
 const activeTab = ref<"properties" | "plugins">("properties");
 const isLoading = ref(false);
 const loadingDebounceTimer = ref<number | null>(null);
@@ -102,10 +102,6 @@ onUnmounted(() => {
   if (autoSaveDebounceTimer.value) {
     clearTimeout(autoSaveDebounceTimer.value);
   }
-});
-
-onActivated(async () => {
-  await loadProperties();
 });
 
 watch(
@@ -205,7 +201,7 @@ async function loadPlugins() {
   pluginsLoading.value = true;
   error.value = null;
   try {
-    plugins.value = await pluginApi.getPlugins(store.currentServerId);
+    plugins.value = await m_pluginApi.m_getPlugins(store.currentServerId);
   } catch (e) {
     error.value = String(e);
     plugins.value = [];
@@ -214,7 +210,7 @@ async function loadPlugins() {
   }
 }
 
-async function togglePlugin(plugin: PluginInfo) {
+async function togglePlugin(plugin: m_PluginInfo) {
   if (!store.currentServerId) return;
 
   if (!plugin.file_name.endsWith(".jar") && !plugin.file_name.endsWith(".jar.disabled")) {
@@ -223,18 +219,18 @@ async function togglePlugin(plugin: PluginInfo) {
   }
 
   try {
-    await pluginApi.togglePlugin(store.currentServerId, plugin.file_name, !plugin.enabled);
+    await m_pluginApi.m_togglePlugin(store.currentServerId, plugin.file_name, !plugin.enabled);
     plugin.enabled = !plugin.enabled;
   } catch (e) {
     error.value = String(e);
   }
 }
 
-async function deletePlugin(plugin: PluginInfo) {
+async function deletePlugin(plugin: m_PluginInfo) {
   if (!store.currentServerId) return;
   if (!confirm(`确定要删除插件 "${plugin.name}" 吗？`)) return;
   try {
-    await pluginApi.deletePlugin(store.currentServerId, plugin.file_name);
+    await m_pluginApi.m_deletePlugin(store.currentServerId, plugin.file_name);
     plugins.value = plugins.value.filter((p) => p.file_name !== plugin.file_name);
     if (selectedPlugin.value?.file_name === plugin.file_name) {
       selectedPlugin.value = null;
@@ -247,14 +243,14 @@ async function deletePlugin(plugin: PluginInfo) {
 async function reloadPlugins() {
   if (!store.currentServerId) return;
   try {
-    await pluginApi.reloadPlugins(store.currentServerId);
+    await m_pluginApi.m_reloadPlugins(store.currentServerId);
     await loadPlugins();
   } catch (e) {
     error.value = String(e);
   }
 }
 
-function handlePluginClick(plugin: PluginInfo) {
+function handlePluginClick(plugin: m_PluginInfo) {
   if (selectedPlugin.value?.file_name === plugin.file_name) {
     selectedPlugin.value = null;
   } else {
@@ -262,13 +258,13 @@ function handlePluginClick(plugin: PluginInfo) {
   }
 }
 
-async function openPluginFolder(plugin: PluginInfo) {
+async function openPluginFolder(plugin: m_PluginInfo) {
   if (!store.currentServerId) return;
   const server = store.servers.find((s) => s.id === store.currentServerId);
   if (!server) return;
 
   const basePath = server.path.replace(/[/\\]$/, "");
-  const pluginConfigPath = `${basePath}${basePath.includes("\\") ? "\\" : "/"}plugins${basePath.includes("\\") ? "\\" : "/"}${plugin.id}`;
+  const pluginConfigPath = `${basePath}${basePath.includes("\\") ? "\\" : "/"}plugins${basePath.includes("\\") ? "\\" : "/"}${plugin.m_id}`;
 
   try {
     await systemApi.openFolder(pluginConfigPath);
@@ -277,7 +273,7 @@ async function openPluginFolder(plugin: PluginInfo) {
   }
 }
 
-async function openConfigFile(config: PluginConfigFile) {
+async function openConfigFile(config: m_PluginConfigFile) {
   try {
     await systemApi.openFile(config.file_path);
   } catch (e) {

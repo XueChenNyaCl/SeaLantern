@@ -1,6 +1,6 @@
 use super::join_manager::JoinManager;
 use super::mod_manager::ModManager;
-use super::plugin_manager::PluginManager;
+use super::mcs_plugin_manager::m_PluginManager;
 use super::server_id_manager::ServerIdManager;
 use super::server_manager::ServerManager;
 use super::settings_manager::SettingsManager;
@@ -21,9 +21,9 @@ pub fn mod_manager() -> &'static ModManager {
     INSTANCE.get_or_init(ModManager::new)
 }
 
-pub fn plugin_manager() -> &'static PluginManager {
-    static INSTANCE: OnceLock<PluginManager> = OnceLock::new();
-    INSTANCE.get_or_init(PluginManager::new)
+pub fn m_plugin_manager() -> &'static m_PluginManager {
+    static INSTANCE: OnceLock<m_PluginManager> = OnceLock::new();
+    INSTANCE.get_or_init(m_PluginManager::new)
 }
 
 pub fn join_manager() -> &'static JoinManager {

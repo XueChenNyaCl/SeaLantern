@@ -3,7 +3,7 @@ pub mod java;
 pub mod join;
 pub mod mods;
 pub mod player;
-pub mod plugin;
+pub mod mcs_plugin;
 pub mod server;
 pub mod server_id;
 pub mod settings;

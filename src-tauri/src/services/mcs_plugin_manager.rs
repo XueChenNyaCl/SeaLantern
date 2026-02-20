@@ -1,18 +1,18 @@
-use crate::models::plugin::*;
+use crate::models::mcs_plugin::*;
 
 use std::fs;
 use std::io::Read;
 use std::path::Path;
 use trash;
 
-pub struct PluginManager;
+pub struct m_PluginManager;
 
-impl PluginManager {
+impl m_PluginManager {
     pub fn new() -> Self {
-        PluginManager
+        m_PluginManager
     }
 
-    pub fn get_plugins(&self, server_path: &str) -> Result<Vec<PluginInfo>, String> {
+    pub fn m_get_plugins(&self, server_path: &str) -> Result<Vec<m_PluginInfo>, String> {
         let plugins_dir = Path::new(server_path).join("plugins");
 
         if !plugins_dir.exists() {
@@ -44,15 +44,15 @@ impl PluginManager {
                 path.clone()
             };
 
-            if let Ok(mut plugin) = self.parse_plugin_jar(&jar_path) {
+            if let Ok(mut plugin) = self.m_parse_plugin_jar(&jar_path) {
                 plugin.enabled = enabled;
                 plugin.file_name = file_name.to_string();
 
-                let plugin_config_dir = plugins_dir.join(&plugin.id);
+                let plugin_config_dir = plugins_dir.join(&plugin.m_id);
                 plugin.has_config_folder = plugin_config_dir.exists();
 
                 if plugin.has_config_folder {
-                    plugin.config_files = self.scan_plugin_config_files(&plugin_config_dir)?;
+                    plugin.config_files = self.m_scan_plugin_config_files(&plugin_config_dir)?;
                 }
 
                 plugins.push(plugin);
@@ -62,7 +62,7 @@ impl PluginManager {
         Ok(plugins)
     }
 
-    fn scan_plugin_config_files(&self, config_dir: &Path) -> Result<Vec<PluginConfigFile>, String> {
+    fn m_scan_plugin_config_files(&self, config_dir: &Path) -> Result<Vec<m_PluginConfigFile>, String> {
         let mut configs = Vec::new();
 
         if !config_dir.exists() {
@@ -89,7 +89,7 @@ impl PluginManager {
                             .unwrap_or("unknown")
                             .to_string();
 
-                        configs.push(PluginConfigFile {
+                        configs.push(m_PluginConfigFile {
                             file_name: file_name.clone(),
                             content: String::new(),
                             file_type: ext.to_string(),
@@ -103,7 +103,7 @@ impl PluginManager {
         Ok(configs)
     }
 
-    fn parse_plugin_jar(&self, jar_path: &Path) -> Result<PluginInfo, String> {
+    fn m_parse_plugin_jar(&self, jar_path: &Path) -> Result<m_PluginInfo, String> {
         use zip::ZipArchive;
 
         let file = fs::File::open(jar_path).map_err(|e| e.to_string())?;
@@ -130,8 +130,8 @@ impl PluginManager {
 
         let file_size = fs::metadata(jar_path).map(|m| m.len()).unwrap_or(0);
 
-        Ok(PluginInfo {
-            id: yaml["name"].as_str().unwrap_or("unknown").to_string(),
+        Ok(m_PluginInfo {
+            m_id: yaml["name"].as_str().unwrap_or("unknown").to_string(),
             name: yaml["name"].as_str().unwrap_or("unknown").to_string(),
             version: yaml["version"].as_str().unwrap_or("unknown").to_string(),
             description: yaml["description"].as_str().unwrap_or("").to_string(),
@@ -149,7 +149,7 @@ impl PluginManager {
         })
     }
 
-    pub fn toggle_plugin(
+    pub fn m_toggle_plugin(
         &self,
         server_path: &str,
         file_name: &str,
@@ -184,7 +184,7 @@ impl PluginManager {
         Ok(())
     }
 
-    pub fn delete_plugin(&self, server_path: &str, file_name: &str) -> Result<(), String> {
+    pub fn m_delete_plugin(&self, server_path: &str, file_name: &str) -> Result<(), String> {
         let plugins_dir = Path::new(server_path).join("plugins");
 
         // 删除 .jar 和 .jar.disabled 文件到回收站
@@ -202,7 +202,7 @@ impl PluginManager {
         Ok(())
     }
 
-    pub async fn install_plugin(
+    pub async fn m_install_plugin(
         &self,
         server_path: &str,
         file_data: Vec<u8>,
